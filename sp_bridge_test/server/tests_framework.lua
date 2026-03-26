@@ -21,8 +21,8 @@ function SPTest.runFrameworkTests(src)
 
     -- ----------------------------------------------------------------
     if not src or src == 0 then
-        SPTest.skip('Player Job — NormalizedJob',     'no player src')
-        SPTest.skip('Player Job — GetRawPlayerJob',   'no player src')
+        SPTest.skip('Player Job \u2014 NormalizedJob',     'no player src')
+        SPTest.skip('Player Job \u2014 GetRawPlayerJob',   'no player src')
         SPTest.skip('Player Identity',                'no player src')
         SPTest.skip('Player Money',                   'no player src')
         SPTest.skip('NormalizedPlayerData',           'no player src')
@@ -30,25 +30,37 @@ function SPTest.runFrameworkTests(src)
     end
 
     -- ----------------------------------------------------------------
-    SPTest.section('Player Job — NormalizedJob', function()
+    SPTest.section('Player Job \u2014 NormalizedJob', function()
         local job = exports.sp_bridge:GetPlayerJob(src)
         SPTest.assertTable('GetPlayerJob returns table', job)
         if type(job) ~= 'table' then return end
 
-        SPTest.assertString('job.name exists',       job.name)
-        SPTest.assertString('job.label exists',      job.label)
-        SPTest.assertNumber('job.grade exists',      job.grade)
-        SPTest.assertString('job.grade_label exists',job.grade_label)
-        SPTest.assertBool  ('job.isboss exists',     job.isboss)
+        -- Top-level scalar fields
+        SPTest.assertString('job.name exists',  job.name)
+        SPTest.assertString('job.label exists', job.label)
+        SPTest.assertBool  ('job.isBoss exists', job.isBoss)
 
-        -- Regression: old raw fields must NOT appear on normalized schema.
-        SPTest.assert('job.grade_name is nil (raw field absent)',
+        -- job.grade must be a table (not a raw number)
+        SPTest.assertTable('job.grade is table', job.grade)
+        if type(job.grade) == 'table' then
+            SPTest.assertNumber('job.grade.level is number', job.grade.level)
+            SPTest.assertString('job.grade.label is string', job.grade.label)
+        end
+
+        -- Regression: old flat fields must NOT leak into the normalized schema.
+        SPTest.assert('job.isboss is nil (stale field absent)',
+            job.isboss == nil,
+            'stale lowercase job.isboss leaked into normalized job')
+        SPTest.assert('job.grade_label is nil (stale field absent)',
+            job.grade_label == nil,
+            'stale job.grade_label leaked into normalized job')
+        SPTest.assert('job.grade_name is nil (stale field absent)',
             job.grade_name == nil,
-            'raw field grade_name leaked into normalized job')
+            'stale job.grade_name leaked into normalized job')
     end)
 
     -- ----------------------------------------------------------------
-    SPTest.section('Player Job — GetRawPlayerJob', function()
+    SPTest.section('Player Job \u2014 GetRawPlayerJob', function()
         local raw = exports.sp_bridge:GetRawPlayerJob(src)
         SPTest.assertTable('GetRawPlayerJob returns table', raw)
         if type(raw) ~= 'table' then return end
@@ -71,7 +83,7 @@ function SPTest.runFrameworkTests(src)
         )
 
         local ident = exports.sp_bridge:GetFrameworkIdentifier(src)
-        SPTest.assertString('GetFrameworkIdentifier returns string', ident)
+        SPTest.assertString  ('GetFrameworkIdentifier returns string', ident)
         SPTest.assertNotEmpty('GetFrameworkIdentifier not empty', ident)
     end)
 
@@ -84,8 +96,8 @@ function SPTest.runFrameworkTests(src)
         local nm = exports.sp_bridge:GetNormalizedMoney(src)
         SPTest.assertTable('GetNormalizedMoney returns table', nm)
         if type(nm) == 'table' then
-            SPTest.assertNumber('nm.cash is number',  nm.cash)
-            SPTest.assertNumber('nm.bank is number',  nm.bank)
+            SPTest.assertNumber('nm.cash is number', nm.cash)
+            SPTest.assertNumber('nm.bank is number', nm.bank)
         end
     end)
 
