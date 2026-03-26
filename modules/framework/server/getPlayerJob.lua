@@ -1,11 +1,11 @@
 -- modules/framework/server/getPlayerJob.lua
--- Returns NormalizedJob (see modules/core/shared.lua for schema).
--- Fields: name, label, onduty, isBoss, grade.{level,name,label,salary}
+-- Returns NormalizedJob. This is an explicit alias for GetNormalizedJob.
+-- Schema: { name, label, onduty, isBoss, grade={level,name,label,salary} }
+--
+-- BREAKING CHANGE (Sprint 2): previously returned the raw, framework-specific
+-- job table. Use GetRawPlayerJob to recover that behavior.
 function sp.getPlayerJob(source)
-    if sp.frameworkProvider and type(sp.frameworkProvider.normalizeJob) == 'function' then
-        return sp.frameworkProvider.normalizeJob(source)
-    end
-    return nil
+    return sp.getNormalizedJob(source)
 end
 
 exports('GetPlayerJob', function(source)
