@@ -1,18 +1,11 @@
+-- modules/framework/client/getPlayerJob.lua
+-- Returns NormalizedJob. This is an explicit alias for GetNormalizedJob.
+-- Schema: { name, label, onduty, isBoss, grade={level,name,label,salary} }
+--
+-- BREAKING CHANGE (Sprint 2): previously returned the raw, framework-specific
+-- job table. Use GetRawPlayerJob to recover that behavior.
 function sp.getPlayerJob()
-    local data = sp.getPlayerData()
-    if type(data) ~= 'table' then
-        return nil
-    end
-
-    if sp.framework == Framework.ESX then
-        return data.job
-    end
-
-    if sp.framework == Framework.QBCore or sp.framework == Framework.QBOX then
-        return data.job or (data.PlayerData and data.PlayerData.job)
-    end
-
-    return nil
+    return sp.getNormalizedJob()
 end
 
 exports('GetPlayerJob', function()

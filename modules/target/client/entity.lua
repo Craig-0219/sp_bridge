@@ -414,12 +414,19 @@ function sp.removeTargetEntity(entities, options)
             return false
         end
 
+        -- qb-target: RemoveTargetEntity(entity, labels) — must pass label names
+        -- or it removes ALL options from the entity
+        local names = options
+        if type(names) == 'string' then names = { names } end
+        names = ensureArray(names)
+        if #names == 0 then return false end
+
         local ok = true
         for i = 1, #entities do
             local ent = entities[i]
             if type(ent) == 'number' then
                 ok = ok and pcall(function()
-                    exports['qb-target']:RemoveTargetEntity(ent)
+                    exports['qb-target']:RemoveTargetEntity(ent, names)
                 end)
             end
         end
