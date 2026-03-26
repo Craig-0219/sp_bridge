@@ -1,25 +1,10 @@
+-- modules/framework/server/getPlayerJob.lua
+-- Returns NormalizedJob (see modules/core/shared.lua for schema).
+-- Fields: name, label, onduty, isBoss, grade.{level,name,label,salary}
 function sp.getPlayerJob(source)
-    local Player = sp.getPlayer(source)
-    if not Player then
-        return nil
+    if sp.frameworkProvider and type(sp.frameworkProvider.normalizeJob) == 'function' then
+        return sp.frameworkProvider.normalizeJob(source)
     end
-
-    if sp.framework == Framework.ESX then
-        local job = Player.job
-        if type(job) == 'table' then
-            return job
-        end
-        return nil
-    end
-
-    if sp.framework == Framework.QBCore or sp.framework == Framework.QBOX then
-        local job = Player.PlayerData and Player.PlayerData.job
-        if type(job) == 'table' then
-            return job
-        end
-        return nil
-    end
-
     return nil
 end
 
