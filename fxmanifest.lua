@@ -18,7 +18,7 @@ shared_scripts {
 }
 
 client_scripts {
-    -- providers must be first so sp.clientProvider is set before export files load
+    -- framework providers must load before glob
     'modules/framework/providers/esx/client.lua',
     'modules/framework/providers/qbcore/client.lua',
     'modules/framework/providers/qbox/client.lua',
@@ -26,9 +26,13 @@ client_scripts {
 }
 
 server_scripts {
-    -- providers must be first so sp.frameworkProvider is set before export files load
+    -- framework providers must load before glob
     'modules/framework/providers/esx/server.lua',
     'modules/framework/providers/qbcore/server.lua',
     'modules/framework/providers/qbox/server.lua',
+    -- inventory providers must load before glob
+    'modules/inventory/providers/ox/server.lua',
+    'modules/inventory/providers/qb/server.lua',
+    'modules/inventory/providers/qs/server.lua',
     'modules/**/server/*.lua',
 }
