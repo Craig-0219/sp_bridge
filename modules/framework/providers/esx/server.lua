@@ -3,11 +3,30 @@ if sp.framework ~= Framework.ESX then return end
 
 local provider = {}
 
+-- Try exports path first (reliable across all ESX Legacy versions);
+-- fall back to the CoreObject cached at startup if the export call fails.
 function provider.getPlayer(source)
     local ok, Player = pcall(function()
+        return exports.es_extended:GetPlayerFromId(source)
+    end)
+    if ok and Player then return Player end
+
+    ok, Player = pcall(function()
         return CoreObject.GetPlayerFromId(source)
     end)
     if ok and Player then return Player end
+    return nil
+end
+
+-- Read the stable identifier from an ESX player object.
+-- ESX Legacy stores it as Player.identifier (property).
+-- Some ESX forks expose Player.getIdentifier() (method) instead.
+local function getPlayerIdentifier(Player)
+    if Player.identifier ~= nil then return Player.identifier end
+    if type(Player.getIdentifier) == 'function' then
+        local ok, id = pcall(Player.getIdentifier, Player)
+        if ok and id ~= nil then return id end
+    end
     return nil
 end
 
@@ -46,11 +65,10 @@ function provider.normalizeJob(source)
 end
 
 function provider.getCharacterId(source)
-    -- ESX uses identifier as primary ID; no separate characterId
+    -- ESX uses identifier as primary ID; no separate characterId.
     local Player = provider.getPlayer(source)
     if not Player then return nil end
-    local ok, id = pcall(function() return Player.identifier end)
-    return ok and id or nil
+    return getPlayerIdentifier(Player)
 end
 
 function provider.normalizePlayerData(source)
@@ -59,11 +77,10 @@ function provider.normalizePlayerData(source)
     data.source  = source
     if not Player then return data end
 
-    local ok
-    ok, data.identifier = pcall(function() return Player.identifier end)
-    if not ok then data.identifier = nil end
+    data.identifier  = getPlayerIdentifier(Player)
     data.characterId = data.identifier
 
+    local ok
     ok, data.name = pcall(function() return Player.getName() end)
     if not ok then data.name = nil end
 
