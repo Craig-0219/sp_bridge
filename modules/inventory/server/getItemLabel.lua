@@ -1,23 +1,18 @@
+-- modules/inventory/server/getItemLabel.lua
+-- Routes through sp.inventoryProvider.getItemLabel.
+-- Returns string|nil.
+-- Fallback: if provider returns nil, returns item name itself (not nil)
+-- so callers always get a usable display string.
+-- Fixed: QBOX previously broken due to type(CoreObject)=='table' guard in old code.
 function sp.getItemLabel(item)
-    if type(item) ~= 'string' or item == '' then
-        return nil
+    if type(item) ~= 'string' or item == '' then return nil end
+
+    if sp.inventoryProvider and type(sp.inventoryProvider.getItemLabel) == 'function' then
+        local ok, label = pcall(sp.inventoryProvider.getItemLabel, item)
+        if ok and type(label) == 'string' and label ~= '' then return label end
     end
 
-    if (sp.framework == Framework.QBCore or sp.framework == Framework.QBOX)
-        and type(CoreObject) == 'table'
-        and type(CoreObject.Shared) == 'table'
-        and type(CoreObject.Shared.Items) == 'table'
-    then
-        local def = CoreObject.Shared.Items[item]
-        if type(def) == 'table' then
-            local label = def.label
-            if type(label) == 'string' and label ~= '' then
-                return label
-            end
-        end
-    end
-
-    return item
+    return item -- fallback: item name is better than nil for display purposes
 end
 
 exports('GetItemLabel', function(item)
