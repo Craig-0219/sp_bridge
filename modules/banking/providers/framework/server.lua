@@ -7,6 +7,8 @@
 if sp.banking ~= Bankings.FRAMEWORK then return end
 
 local provider = {}
+provider.name         = 'framework'
+provider.capabilities = { playerBank = true, society = false }
 
 -- ---------------------------------------------------------------------------
 -- Player bank
@@ -34,7 +36,9 @@ function provider.removePlayerBankMoney(source, amount, reason)
 end
 
 -- ---------------------------------------------------------------------------
--- Society  (not supported by framework money)
+-- Society  (not supported — capability.society = false)
+-- The wrappers check capabilities before calling these; these are only here
+-- as a safe fallback in case the wrapper skips the check.
 -- ---------------------------------------------------------------------------
 
 function provider.getSocietyBalance(accountId)        return 0   end
@@ -42,4 +46,8 @@ function provider.addSocietyMoney(accountId, amount, reason)    return false end
 function provider.removeSocietyMoney(accountId, amount, reason) return false end
 
 sp.bankProvider = provider
-sp.print.info('[provider] bank/framework provider registered')
+sp.print.info(('[banking] provider=%s playerBank=%s society=%s'):format(
+    provider.name,
+    tostring(provider.capabilities.playerBank),
+    tostring(provider.capabilities.society)
+))

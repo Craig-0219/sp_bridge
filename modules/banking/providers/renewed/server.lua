@@ -13,6 +13,8 @@
 if sp.banking ~= Bankings.RENEWED then return end
 
 local provider = {}
+provider.name         = 'renewed'
+provider.capabilities = { playerBank = true, society = true }
 
 -- ---------------------------------------------------------------------------
 -- Player bank
@@ -52,8 +54,8 @@ function provider.getSocietyBalance(accountId)
         return exports['Renewed-Banking']:GetAccount(accountId)
     end)
     if not ok then return 0 end
-    if type(val) == 'number'                              then return val         end
-    if type(val) == 'table' and type(val.balance) == 'number' then return val.balance end
+    if type(val) == 'number'                                  then return val          end
+    if type(val) == 'table' and type(val.balance) == 'number' then return val.balance  end
     return 0
 end
 
@@ -74,4 +76,8 @@ function provider.removeSocietyMoney(accountId, amount, reason)
 end
 
 sp.bankProvider = provider
-sp.print.info('[provider] bank/Renewed-Banking provider registered')
+sp.print.info(('[banking] provider=%s playerBank=%s society=%s'):format(
+    provider.name,
+    tostring(provider.capabilities.playerBank),
+    tostring(provider.capabilities.society)
+))

@@ -13,6 +13,8 @@ if sp.banking ~= Bankings.QB_BANKING and sp.banking ~= Bankings.QB_MANAGEMENT th
 local bankResource = (sp.banking == Bankings.QB_MANAGEMENT) and 'qb-management' or 'qb-banking'
 
 local provider = {}
+provider.name         = bankResource
+provider.capabilities = { playerBank = true, society = true }
 
 -- ---------------------------------------------------------------------------
 -- Player bank  (QB stores player bank in framework money, not the society DB)
@@ -67,4 +69,8 @@ function provider.removeSocietyMoney(accountId, amount, reason)
 end
 
 sp.bankProvider = provider
-sp.print.info(('[provider] bank/%s provider registered'):format(bankResource))
+sp.print.info(('[banking] provider=%s playerBank=%s society=%s'):format(
+    provider.name,
+    tostring(provider.capabilities.playerBank),
+    tostring(provider.capabilities.society)
+))

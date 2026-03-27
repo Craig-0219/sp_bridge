@@ -1,8 +1,8 @@
 -- modules/banking/providers/okok/server.lua
 -- okokBanking provider.
 -- Player bank  : delegates to sp.getMoney / sp.addMoney / sp.removeMoney
---                (ESX/QB framework bank money; okokBanking manages society accounts,
---                 not individual player bank balances).
+--                (ESX/QB framework bank money; okokBanking manages society
+--                 accounts, not individual player bank balances).
 -- Society      : okokBanking exports.
 --
 -- Assumed exports:
@@ -13,6 +13,8 @@
 if sp.banking ~= Bankings.OKOK then return end
 
 local provider = {}
+provider.name         = 'okokBanking'
+provider.capabilities = { playerBank = true, society = true }
 
 -- ---------------------------------------------------------------------------
 -- Player bank
@@ -50,8 +52,6 @@ function provider.getSocietyBalance(accountId)
 end
 
 function provider.addSocietyMoney(accountId, amount, reason)
-    -- okokBanking: AddMoney(account, amount, reason, source)
-    -- source = 0 means server-initiated (no player attached).
     local ok, result = pcall(function()
         return exports['okokBanking']:AddMoney(accountId, amount, reason or '', 0)
     end)
@@ -68,4 +68,8 @@ function provider.removeSocietyMoney(accountId, amount, reason)
 end
 
 sp.bankProvider = provider
-sp.print.info('[provider] bank/okokBanking provider registered')
+sp.print.info(('[banking] provider=%s playerBank=%s society=%s'):format(
+    provider.name,
+    tostring(provider.capabilities.playerBank),
+    tostring(provider.capabilities.society)
+))
