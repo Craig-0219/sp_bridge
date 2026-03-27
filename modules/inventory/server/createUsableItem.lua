@@ -1,7 +1,6 @@
 -- modules/inventory/server/createUsableItem.lua
 -- Routes through sp.inventoryProvider.createUsableItem.
--- ESX native fallback: CoreObject.RegisterUsableItem / exports path
--- when no third-party inventory provider is registered.
+-- ESX native fallback (three attempts) when no third-party inventory.
 -- Always returns boolean.
 function sp.createUsableItem(item, cb)
     if type(item) ~= 'string' or item == '' then return false end
@@ -13,16 +12,36 @@ function sp.createUsableItem(item, cb)
         return result == true
     end
 
-    -- ESX native fallback when no third-party inventory (ox/qb/qs) is active.
-    -- CoreObject = ESX shared object (has RegisterUsableItem).
+    -- ESX native fallback: used when no third-party inventory is detected.
+    -- Three attempts in order of reliability:
     if sp.framework == Framework.ESX then
+        -- Attempt 1: CoreObject cached at startup (standard ESX Legacy path)
         if type(CoreObject) == 'table' and type(CoreObject.RegisterUsableItem) == 'function' then
             local ok = pcall(function() CoreObject.RegisterUsableItem(item, cb) end)
             if ok then return true end
+            sp.print.warn('[inventory] createUsableItem ESX CoreObject path failed item=' .. item)
         end
-        -- Alternative: direct export (ESX Legacy 1.9+)
-        local ok = pcall(function() exports.es_extended:RegisterUsableItem(item, cb) end)
-        return ok
+
+        -- Attempt 2: direct export (some ESX forks expose this explicitly)
+        do
+            local ok = pcall(function() exports.es_extended:RegisterUsableItem(item, cb) end)
+            if ok then return true end
+        end
+
+        -- Attempt 3: fetch fresh shared object at call-time.
+        -- Handles cases where CoreObject was nil/incomplete at resource startup.
+        do
+            local ok, esx = pcall(function()
+                return exports['es_extended']:getSharedObject()
+            end)
+            if ok and type(esx) == 'table' and type(esx.RegisterUsableItem) == 'function' then
+                local ok2 = pcall(function() esx.RegisterUsableItem(item, cb) end)
+                if ok2 then return true end
+            end
+        end
+
+        sp.print.warn('[inventory] createUsableItem ESX all paths failed item=' .. item)
+        return false
     end
 
     return false

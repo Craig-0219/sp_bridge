@@ -69,14 +69,13 @@ end
 
 --- OX inventory: try ox_inventory:RegisterUsableItem first.
 --- Falls back to framework-level registration for ESX / QBCore / QBOX.
---- TODO: verify RegisterUsableItem availability across ox_inventory versions.
 function provider.createUsableItem(item, cb)
     local ok = pcall(function()
         exports.ox_inventory:RegisterUsableItem(item, cb)
     end)
     if ok then return true end
 
-    -- Fallback to framework-level registration
+    -- Fallback: framework-level registration when ox export is unavailable.
     if sp.framework == Framework.QBOX then
         local ok2 = pcall(function() exports.qbx_core:CreateUseableItem(item, cb) end)
         return ok2
@@ -87,16 +86,25 @@ function provider.createUsableItem(item, cb)
         and type(CoreObject.Functions) == 'table'
         and type(CoreObject.Functions.CreateUseableItem) == 'function'
     then
-        CoreObject.Functions.CreateUseableItem(item, cb)
-        return true
+        local ok2 = pcall(function() CoreObject.Functions.CreateUseableItem(item, cb) end)
+        return ok2
     end
 
-    if sp.framework == Framework.ESX
-        and type(CoreObject) == 'table'
-        and type(CoreObject.RegisterUsableItem) == 'function'
-    then
-        CoreObject.RegisterUsableItem(item, cb)
-        return true
+    if sp.framework == Framework.ESX then
+        -- Attempt 1: CoreObject cached at startup
+        if type(CoreObject) == 'table' and type(CoreObject.RegisterUsableItem) == 'function' then
+            local ok2 = pcall(function() CoreObject.RegisterUsableItem(item, cb) end)
+            if ok2 then return true end
+        end
+        -- Attempt 2: fetch fresh shared object (handles stale CoreObject at startup)
+        local ok2, esx = pcall(function()
+            return exports['es_extended']:getSharedObject()
+        end)
+        if ok2 and type(esx) == 'table' and type(esx.RegisterUsableItem) == 'function' then
+            local ok3 = pcall(function() esx.RegisterUsableItem(item, cb) end)
+            return ok3
+        end
+        return false
     end
 
     return false
