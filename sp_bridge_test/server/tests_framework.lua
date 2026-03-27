@@ -21,8 +21,8 @@ function SPTest.runFrameworkTests(src)
 
     -- ----------------------------------------------------------------
     if not src or src == 0 then
-        SPTest.skip('Player Job \u2014 NormalizedJob',     'no player src')
-        SPTest.skip('Player Job \u2014 GetRawPlayerJob',   'no player src')
+        SPTest.skip('Player Job - NormalizedJob',     'no player src')
+        SPTest.skip('Player Job - GetRawPlayerJob',   'no player src')
         SPTest.skip('Player Identity',                'no player src')
         SPTest.skip('Player Money',                   'no player src')
         SPTest.skip('NormalizedPlayerData',           'no player src')
@@ -30,7 +30,7 @@ function SPTest.runFrameworkTests(src)
     end
 
     -- ----------------------------------------------------------------
-    SPTest.section('Player Job \u2014 NormalizedJob', function()
+    SPTest.section('Player Job - NormalizedJob', function()
         local job = exports.sp_bridge:GetPlayerJob(src)
         SPTest.assertTable('GetPlayerJob returns table', job)
         if type(job) ~= 'table' then return end
@@ -60,7 +60,7 @@ function SPTest.runFrameworkTests(src)
     end)
 
     -- ----------------------------------------------------------------
-    SPTest.section('Player Job \u2014 GetRawPlayerJob', function()
+    SPTest.section('Player Job - GetRawPlayerJob', function()
         local raw = exports.sp_bridge:GetRawPlayerJob(src)
         SPTest.assertTable('GetRawPlayerJob returns table', raw)
         if type(raw) ~= 'table' then return end

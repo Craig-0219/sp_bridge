@@ -18,6 +18,7 @@ server_scripts {
     'server/tests_framework.lua',
     'server/tests_inventory.lua',
     'server/tests_qbox.lua',
+    'server/tests_banking.lua',
     'server/main.lua',
 }
 
