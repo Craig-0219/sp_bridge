@@ -34,5 +34,10 @@ server_scripts {
     'modules/inventory/providers/ox/server.lua',
     'modules/inventory/providers/qb/server.lua',
     'modules/inventory/providers/qs/server.lua',
+    -- bank providers must load before glob
+    'modules/banking/providers/framework/server.lua',
+    'modules/banking/providers/renewed/server.lua',
+    'modules/banking/providers/qb/server.lua',
+    'modules/banking/providers/okok/server.lua',
     'modules/**/server/*.lua',
 }
