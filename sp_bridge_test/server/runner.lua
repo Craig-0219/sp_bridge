@@ -25,6 +25,7 @@ function SPTest.run(src)
 
     SPTest.runFrameworkTests(src)
     SPTest.runInventoryTests(src)
+    SPTest.runBankingTests(src)
 
     -- QBOX-specific tests only when the active framework is qbx.
     if fw == 'qbx' then
