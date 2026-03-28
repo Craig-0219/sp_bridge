@@ -96,10 +96,18 @@ function SPTest.runInventoryTests(src)
     end)
 
     -- ----------------------------------------------------------------
-    SPTest.section('CreateUsableItem', function()
-        -- Register a no-op usable; verifies routing works and returns true.
-        local ok = exports.sp_bridge:CreateUsableItem('sp_test_dummy_item', function() end)
-        SPTest.assertBool('CreateUsableItem returns bool', ok)
-        SPTest.assert('CreateUsableItem returned true', ok == true)
-    end)
+    -- ox_inventory uses a client-side item-use system (exports.ox_inventory:useItem);
+    -- there is no server-side RegisterUsableItem in ox_inventory 2.x.
+    -- Skip the "must return true" check when ox is the active inventory provider.
+    local systems = exports.sp_bridge:GetDetectedSystems()
+    local invName = systems and systems.inventory or ''
+    if invName == 'ox_inventory' then
+        SPTest.skip('CreateUsableItem', 'ox_inventory uses client-side item-use; server RegisterUsableItem not applicable')
+    else
+        SPTest.section('CreateUsableItem', function()
+            local ok = exports.sp_bridge:CreateUsableItem('sp_test_dummy_item', function() end)
+            SPTest.assertBool('CreateUsableItem returns bool', ok)
+            SPTest.assert('CreateUsableItem returned true', ok == true)
+        end)
+    end
 end
