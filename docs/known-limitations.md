@@ -60,17 +60,21 @@ Client-side 對應 export（`GetPlayerJob`、`GetPlayerData`、`GetMoney` 等）
 
 ---
 
-## 4. ESX Banking 偵測但無 Provider
+## 4. ESX Banking 偵測時自動 fallback 至框架金錢層
 
 **限制描述**
 
-`init.lua` 會偵測 `esx_banking` 與 `esx_addonaccount` 並設定 `sp.banking`，但 Beta 1 未實作對應的 banking provider。
+`init.lua` 會偵測 `esx_banking` 與 `esx_addonaccount`。這兩個 resource 在 Beta 1 無專屬 provider。
 
-呼叫任何 banking export 時，若這兩個 resource 被偵測為 banking source，系統會找不到 `sp.bankProvider`，所有 banking export 會回傳 `0` / `false` 並寫入 `reason=no_provider`。
+當偵測到這兩個 resource 時，framework banking provider 會自動接管（fallback），透過框架金錢層（`sp.getMoney/addMoney/removeMoney('bank')`）處理 player bank 操作。此行為是盡力而為（best-effort），而非對 `esx_banking` / `esx_addonaccount` 的完整整合。
+
+**具體行為**
+- Player bank API（`GetPlayerBankBalance`、`AddPlayerBankMoney`、`RemovePlayerBankMoney`）可用，透過框架金錢層
+- Society API 固定回傳 `0` / `false`（`capabilities.society = false`）
+- `GetBankProviderName()` 回傳 `'framework'`（即使原偵測結果為 `esx_banking`）
 
 **建議做法**
-- 使用 `esx_banking` / `esx_addonaccount` 的伺服器，Beta 1 的 banking export 不可用。
-- 可手動在 `config.lua` 設定 `Config.Banking = 'framework'` 強制使用框架金錢層。
+- 若需要完整的 `esx_banking` 整合，請等待未來版本的專屬 provider，或手動設定 `Config.Banking = 'framework'`。
 
 ---
 

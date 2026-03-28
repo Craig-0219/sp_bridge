@@ -86,7 +86,7 @@ sp_test 1
 | `GetSocietyBalance` | banking provider 不支援 society（如 `framework` provider） |
 | `AddSocietyMoney` | 同上 |
 | `RemoveSocietyMoney` | 同上 |
-| `CreateUsableItem` inventory 測試 | 使用 qs-inventory（不支援 RegisterUsableItem） |
+| `CreateUsableItem` inventory 測試 | 使用 qs-inventory（不支援 RegisterUsableItem）或 ox_inventory（item-use 為 client-side）|
 
 ### 不可接受的 FAIL
 

@@ -4,7 +4,16 @@
 --                (framework layer, 'bank' money type).
 -- Society      : NOT supported — framework money has no society concept.
 --                All society calls return safe no-op defaults (0 / false).
-if sp.banking ~= Bankings.FRAMEWORK then return end
+-- Register as the framework-layer bank provider for:
+--   Bankings.FRAMEWORK       : explicit framework money routing
+--   Bankings.ESX_BANKING     : esx_banking detected but no dedicated provider in Beta 1
+--   Bankings.ESX_ADDON_ACCOUNT: esx_addonaccount detected but no dedicated provider in Beta 1
+-- In the latter two cases we fall back to sp.getMoney/addMoney/removeMoney('bank'),
+-- which is a best-effort approximation rather than a full esx_banking integration.
+local handled = sp.banking == Bankings.FRAMEWORK
+    or sp.banking == Bankings.ESX_BANKING
+    or sp.banking == Bankings.ESX_ADDON_ACCOUNT
+if not handled then return end
 
 local provider = {}
 provider.name         = 'framework'
