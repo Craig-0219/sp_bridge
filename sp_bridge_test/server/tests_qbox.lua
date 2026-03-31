@@ -7,10 +7,18 @@ function SPTest.runQBOXTests(src)
     print('[sp_bridge_test] ==== QBOX Regression Tests ====')
 
     -- ----------------------------------------------------------------
+    -- QBOX + ox_inventory: ox uses client-side item-use system (same as ESX + ox).
+    -- exports.qbx_core:CreateUseableItem may not exist in all qbx_core versions.
+    -- Skip when ox_inventory is the active provider.
+    local systems = exports.sp_bridge:GetDetectedSystems()
+    local invName = systems and systems.inventory or ''
+
     SPTest.section('QBOX CreateUsableItem', function()
-        -- Before the CoreObject fix, type(CoreObject)=='table' was always false
-        -- for QBOX (CoreObject is the string 'qbx_core'), causing CreateUsableItem
-        -- to silently skip registration and return false.
+        if invName == 'ox_inventory' then
+            SPTest.skip('QBOX CreateUsableItem',
+                'ox_inventory: server-side usable item callback not applicable in ox+QBOX setup')
+            return
+        end
         local ok = exports.sp_bridge:CreateUsableItem('sp_test_qbox_dummy', function() end)
         SPTest.assertBool('CreateUsableItem returns bool', ok)
         SPTest.assert(

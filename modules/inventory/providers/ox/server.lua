@@ -63,7 +63,16 @@ function provider.getItemDefinitions()
     local ok, items = pcall(function()
         return exports.ox_inventory:Items()
     end)
-    if ok and type(items) == 'table' then return items end
+    if ok and type(items) == 'table' and next(items) ~= nil then return items end
+
+    -- QBOX fallback: ox_inventory:Items() may return empty when items are not
+    -- registered in ox's own items.lua. qbx_core:GetItems() provides the full
+    -- item registry in QBOX environments.
+    if sp.framework == Framework.QBOX then
+        local ok2, qbxItems = pcall(function() return exports.qbx_core:GetItems() end)
+        if ok2 and type(qbxItems) == 'table' then return qbxItems end
+    end
+
     return {}
 end
 
