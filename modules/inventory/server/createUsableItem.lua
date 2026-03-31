@@ -12,6 +12,15 @@ function sp.createUsableItem(item, cb)
         return result == true
     end
 
+    -- QBOX native fallback: used when no third-party inventory provider is detected.
+    -- CoreObject for QBOX is the string 'qbx_core', NOT a table — must use exports directly.
+    if sp.framework == Framework.QBOX then
+        local ok = pcall(function() exports.qbx_core:CreateUseableItem(item, cb) end)
+        if ok then return true end
+        sp.print.warn('[inventory] createUsableItem QBOX path failed item=' .. item)
+        return false
+    end
+
     -- ESX native fallback: used when no third-party inventory is detected.
     -- Three attempts in order of reliability:
     if sp.framework == Framework.ESX then

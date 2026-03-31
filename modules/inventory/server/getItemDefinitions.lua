@@ -55,10 +55,21 @@ end
 function sp.getItemDefinitions()
     if sp.inventoryProvider and type(sp.inventoryProvider.getItemDefinitions) == 'function' then
         local ok, raw = pcall(sp.inventoryProvider.getItemDefinitions)
-        if ok and type(raw) == 'table' then
+        if ok and type(raw) == 'table' and next(raw) ~= nil then
             return normalizeItems(raw)
         end
     end
+
+    -- QBOX native fallback: used when no third-party inventory provider is detected
+    -- OR when the provider returns an empty table (e.g. ox_inventory with no items.lua).
+    -- qbx_core:GetItems() returns the full item registry registered in qbx_core.
+    if sp.framework == Framework.QBOX then
+        local ok, items = pcall(function() return exports.qbx_core:GetItems() end)
+        if ok and type(items) == 'table' then
+            return normalizeItems(items)
+        end
+    end
+
     return {}
 end
 
