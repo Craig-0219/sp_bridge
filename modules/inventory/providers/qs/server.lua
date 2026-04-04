@@ -57,8 +57,7 @@ end
 --- Routes by sp.framework.
 function provider.createUsableItem(item, cb)
     if sp.framework == Framework.QBOX then
-        local ok = pcall(function() exports.qbx_core:CreateUseableItem(item, cb) end)
-        return ok
+        return sp.createQboxUsableItem(item, cb)
     end
 
     if sp.framework == Framework.QBCore
@@ -78,12 +77,10 @@ end
 --- TODO: check if qs-inventory exposes a GetItemList with labels in newer versions.
 function provider.getItemLabel(item)
     if sp.framework == Framework.QBOX then
-        local ok, items = pcall(function() return exports.qbx_core:GetItems() end)
-        if ok and type(items) == 'table' then
-            local def = items[item]
-            if type(def) == 'table' and type(def.label) == 'string' and def.label ~= '' then
-                return def.label
-            end
+        local items = sp.getQboxItemDefinitions()
+        local def = type(items) == 'table' and items[item] or nil
+        if type(def) == 'table' and type(def.label) == 'string' and def.label ~= '' then
+            return def.label
         end
         return nil
     end
@@ -107,7 +104,15 @@ function provider.getItemDefinitions()
     local ok, items = pcall(function()
         return exports['qs-inventory']:GetItemList()
     end)
-    if ok and type(items) == 'table' then return items end
+    if ok and type(items) == 'table' and next(items) ~= nil then return items end
+
+    if sp.framework == Framework.QBOX then
+        local qboxItems = sp.getQboxItemDefinitions()
+        if type(qboxItems) == 'table' and next(qboxItems) ~= nil then
+            return qboxItems
+        end
+    end
+
     return {}
 end
 

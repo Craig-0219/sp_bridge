@@ -13,10 +13,8 @@ function sp.createUsableItem(item, cb)
     end
 
     -- QBOX native fallback: used when no third-party inventory provider is detected.
-    -- CoreObject for QBOX is the string 'qbx_core', NOT a table — must use exports directly.
     if sp.framework == Framework.QBOX then
-        local ok = pcall(function() exports.qbx_core:CreateUseableItem(item, cb) end)
-        if ok then return true end
+        if sp.createQboxUsableItem(item, cb) then return true end
         sp.print.warn('[inventory] createUsableItem QBOX path failed item=' .. item)
         return false
     end

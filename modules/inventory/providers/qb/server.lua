@@ -58,9 +58,7 @@ end
 --- Routes by sp.framework since qb-inventory is used with both QBCore and QBOX.
 function provider.createUsableItem(item, cb)
     if sp.framework == Framework.QBOX then
-        -- QBOX: CoreObject is string 'qbx_core'; must use exports directly
-        local ok = pcall(function() exports.qbx_core:CreateUseableItem(item, cb) end)
-        return ok
+        return sp.createQboxUsableItem(item, cb)
     end
 
     if sp.framework == Framework.QBCore
@@ -80,12 +78,10 @@ end
 --- QBCore: CoreObject.Shared.Items is available directly.
 function provider.getItemLabel(item)
     if sp.framework == Framework.QBOX then
-        local ok, items = pcall(function() return exports.qbx_core:GetItems() end)
-        if ok and type(items) == 'table' then
-            local def = items[item]
-            if type(def) == 'table' and type(def.label) == 'string' and def.label ~= '' then
-                return def.label
-            end
+        local items = sp.getQboxItemDefinitions()
+        local def = type(items) == 'table' and items[item] or nil
+        if type(def) == 'table' and type(def.label) == 'string' and def.label ~= '' then
+            return def.label
         end
         return nil
     end
@@ -105,8 +101,8 @@ end
 
 function provider.getItemDefinitions()
     if sp.framework == Framework.QBOX then
-        local ok, items = pcall(function() return exports.qbx_core:GetItems() end)
-        if ok and type(items) == 'table' then return items end
+        local items = sp.getQboxItemDefinitions()
+        if type(items) == 'table' and next(items) ~= nil then return items end
         return {}
     end
 

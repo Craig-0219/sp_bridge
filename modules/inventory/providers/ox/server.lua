@@ -69,8 +69,8 @@ function provider.getItemDefinitions()
     -- registered in ox's own items.lua. qbx_core:GetItems() provides the full
     -- item registry in QBOX environments.
     if sp.framework == Framework.QBOX then
-        local ok2, qbxItems = pcall(function() return exports.qbx_core:GetItems() end)
-        if ok2 and type(qbxItems) == 'table' then return qbxItems end
+        local qbxItems = sp.getQboxItemDefinitions()
+        if type(qbxItems) == 'table' and next(qbxItems) ~= nil then return qbxItems end
     end
 
     return {}
@@ -86,8 +86,7 @@ function provider.createUsableItem(item, cb)
 
     -- Fallback: framework-level registration when ox export is unavailable.
     if sp.framework == Framework.QBOX then
-        local ok2 = pcall(function() exports.qbx_core:CreateUseableItem(item, cb) end)
-        return ok2
+        return sp.createQboxUsableItem(item, cb)
     end
 
     if sp.framework == Framework.QBCore

@@ -4,6 +4,10 @@
 -- On the client side this file still runs; bankProvider stays nil
 -- because all bank mutations are server-only.
 
+if type(sp) ~= 'table' then
+    sp = {}
+end
+
 sp.bankProvider = nil
 
 ---@return table|nil

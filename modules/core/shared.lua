@@ -1,6 +1,10 @@
 -- modules/core/shared.lua
 -- Normalize schemas and utility functions shared across all sides
 
+if type(sp) ~= 'table' then
+    sp = {}
+end
+
 --- Default normalized money schema
 function sp.defaultNormalizedMoney()
     return { cash = 0, bank = 0, black = nil }

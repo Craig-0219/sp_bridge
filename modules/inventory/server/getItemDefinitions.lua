@@ -62,10 +62,9 @@ function sp.getItemDefinitions()
 
     -- QBOX native fallback: used when no third-party inventory provider is detected
     -- OR when the provider returns an empty table (e.g. ox_inventory with no items.lua).
-    -- qbx_core:GetItems() returns the full item registry registered in qbx_core.
     if sp.framework == Framework.QBOX then
-        local ok, items = pcall(function() return exports.qbx_core:GetItems() end)
-        if ok and type(items) == 'table' then
+        local items = sp.getQboxItemDefinitions()
+        if type(items) == 'table' and next(items) ~= nil then
             return normalizeItems(items)
         end
     end

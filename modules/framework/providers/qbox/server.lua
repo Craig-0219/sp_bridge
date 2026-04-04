@@ -17,6 +17,12 @@ function provider.getMoney(source, moneyType)
     local Player = provider.getPlayer(source)
     if not Player then return 0 end
     local account = (moneyType == 'money') and 'cash' or moneyType
+    local okData, dataValue = pcall(function()
+        return Player.PlayerData and Player.PlayerData.money and Player.PlayerData.money[account]
+    end)
+    if okData and type(dataValue) == 'number' then
+        return dataValue
+    end
     local ok, val = pcall(function()
         return Player.Functions.GetMoney(account)
     end)

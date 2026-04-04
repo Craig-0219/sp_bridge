@@ -5,7 +5,34 @@
 function SPTest.runInventoryTests(src)
     print('[sp_bridge_test] ==== Inventory Tests ====')
 
-    local item = SPTest.testItem
+    local function resolveTestItem()
+        local preferred = SPTest.testItem
+        local defs = exports.sp_bridge:GetItemDefinitions()
+
+        if type(preferred) == 'string' and preferred ~= '' and type(defs) == 'table' and defs[preferred] then
+            return preferred
+        end
+
+        if type(defs) == 'table' then
+            local fallbacks = { 'water', 'burger', 'bandage', 'phone' }
+            for i = 1, #fallbacks do
+                local candidate = fallbacks[i]
+                if defs[candidate] then
+                    return candidate
+                end
+            end
+
+            for name in pairs(defs) do
+                if type(name) == 'string' and name ~= '' then
+                    return name
+                end
+            end
+        end
+
+        return preferred
+    end
+
+    local item = resolveTestItem()
 
     -- ----------------------------------------------------------------
     SPTest.section('Item Definitions', function()
